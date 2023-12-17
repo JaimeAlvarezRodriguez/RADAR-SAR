@@ -1,7 +1,12 @@
 import tkinter
+from AppRadar.new_window import New_window
 
-root = tkinter.Tk()
-root.title("RADAR SAR")
-root.geometry("600x400")
-root.mainloop()
+class AppRadar(tkinter.Tk):
+    def __init__(self, tittle, geometry):
+        super().__init__()
+        self.title(tittle)
+        self.geometry(geometry)
+
+root = AppRadar(tittle="RADAR SAR", geometry="600x400")
+tkinter.mainloop()
 
