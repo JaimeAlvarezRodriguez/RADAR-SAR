@@ -1,3 +1,8 @@
+"""
+Proyect: RADAR SAR
+Author: Jaime Alvarez Rodriguez
+
+"""
 import tkinter
 from AppRadar.new_window import New_window
 
