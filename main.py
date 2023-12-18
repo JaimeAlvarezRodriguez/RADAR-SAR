@@ -6,11 +6,12 @@ Description:    User interface to control and processing signals from RADAR SAR 
 import tkinter
 import tkinter.messagebox as message
 import tkinter.filedialog as filedialog
-import numpy as np
 from AppRadar.menu import Menu
 from AppRadar.conection_esp32 import WND_Radar_conection, RadarSAR
 from AppRadar.plot import matplot_widget
 from AppRadar.file_management import load_RADARSAR
+from AppRadar.realtime_scope import RealtimeScope
+from AppRadar.record import RecordWindow
 
 class AppRadar(tkinter.Tk):
     def __init__(self, tittle, geometry):
@@ -21,12 +22,12 @@ class AppRadar(tkinter.Tk):
             menulist = (
                 ("Archivo", 
                     (("Abrir", None, self.open)          ,
-                     ("Grabar señal", None, None)   ,
+                     ("Grabar señal", None, self.record)   ,
                      ("Salir", None, self.destroy)
                     ), 
                 ),
                 ("Analisis", 
-                    (("Señal en tiempo real", None, None)   ,  
+                    (("Señal en tiempo real", None, self.realtime)   ,  
                      ("Velocidad", None, None)              ,
                      ("Distancia", None, None)              ,
                      ("Imagen SAR", None, None)
@@ -67,6 +68,10 @@ class AppRadar(tkinter.Tk):
         else:
             message.showwarning("Error de Archivo", "No seleccionaste ningun archivo")
         print(self.file_route)
+    def record(self, event=None):
+        RecordWindow(self, "Grabar .RADARSAR", "400x200", self.radar)
+    def realtime(self, event=None):
+        RealtimeScope(self, "Señal de receptor", "600x400", self.radar)
     def conexion_esp32(self, event=None):
         WND_Radar_conection(self, "Conectar ESP32", "400x200", self.radar)
     def destroy(self) -> None:

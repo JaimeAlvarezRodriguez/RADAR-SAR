@@ -6,9 +6,9 @@ class New_window(tkinter.Toplevel):
         super().__init__(master=master)
         self.title(tittle)
         self.geometry(geometry)
-    def create_widgets():
+    def create_widgets(self):
         pass
-    def place_widgets():
+    def place_widgets(self):
         pass
 
     

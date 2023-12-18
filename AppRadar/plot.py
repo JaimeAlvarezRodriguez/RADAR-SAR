@@ -32,3 +32,6 @@ class matplot_widget:
         self.ax.set_ylim(ymin=ymin, ymax=ymax)
         self.ax.set_xlim(xmin=xmin, xmax=xmax)
         self.canvas.draw()
+    def set_title(self, title):
+        self.ax.set_title(title)
+        self.canvas.draw()

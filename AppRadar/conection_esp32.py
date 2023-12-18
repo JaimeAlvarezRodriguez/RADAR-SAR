@@ -7,7 +7,7 @@ from .new_window import New_window
 
 RQST_NONE__ = 0
 RQST_INFO__ = 1
-RQST_RECORD = 3
+RQST_RECORD = 2
 
 INFO_NAME__ = 0
 INFO_MACADR = 1

@@ -3,7 +3,7 @@
 
 #define RQST_NONE__  0
 #define RQST_INFO__  1
-#define RQST_RECORD  3
+#define RQST_RECORD  2
 
 #define INFO_NAME__  0
 #define INFO_MACADR  1
@@ -14,3 +14,6 @@
 
 #define RAW_DATA_SIZE 10000
 #define DATA_SIZE     5000
+
+#define SYNC_PIN 35
+#define SGNL_PIN 34
