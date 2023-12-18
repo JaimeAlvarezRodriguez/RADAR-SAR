@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
+from .new_window import New_window
 
 class matplot_widget:
     def __init__(self, master):
@@ -35,3 +36,15 @@ class matplot_widget:
     def set_title(self, title):
         self.ax.set_title(title)
         self.canvas.draw()
+
+class AnalysisWindow(New_window):
+    def __init__(self, master, tittle, file, progressbar, callback, labels):
+        super().__init__(master, tittle, "600x400")
+        (x, y, z) = callback(file, progressbar)
+        self.create_widgets()
+        self.place_widgets()
+    def create_widgets(self):
+        self.matplot = matplot_widget(self)
+    def place_widgets(self):
+        self.matplot.pack()
+    

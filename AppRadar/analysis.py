@@ -10,7 +10,7 @@ __c__ = 3E8
 def dbv(input):
     return 20 * np.log10(abs(input))
 
-def doppler(file = DEFAULT_NAME):
+def doppler(file = DEFAULT_NAME, progressbar = print):
     data, samplerate = load_RADARSAR(file)
     data = data * __Scale__
 
@@ -57,7 +57,7 @@ def doppler(file = DEFAULT_NAME):
 
     return (time, velocity, (v-mmax).T)
 
-def ranging(file=DEFAULT_NAME):
+def ranging(file=DEFAULT_NAME, progressbar = print):
     data, samplerate = load_RADARSAR(file)
     Y = Y * __Scale__
     #Parametros del RADAR
@@ -113,7 +113,7 @@ def ranging(file=DEFAULT_NAME):
 
     return (time, np.linspace(0, max_range, len((S)[0])), (S-m).T)
 
-def SAR_1part(file=DEFAULT_NAME, progressbar=function):
+def SAR_1part(file=DEFAULT_NAME, progressbar=print):
     data, samplerate = load_RADARSAR(file)
 
     data = data * __Scale__
@@ -214,7 +214,7 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=function):
     Kr = np.linspace(((4*np.pi/c)*(fc - B/2)), ((4*np.pi/c)*(fc + B/2)), (len(t)))
     return (sif, delta_x, Rs, Kr, Xa)
 
-def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar):
+def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
     progressbar(7)
 
     N = len(sif[0])
@@ -345,7 +345,7 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar):
     return (crossrange, downrange, trunc_image)
 
 
-def SAR_imaging(file=DEFAULT_NAME, prograssbar=function):
+def SAR_imaging(file=DEFAULT_NAME, prograssbar=print):
     (sif, delta_x, Rs, Kr, Xa) = SAR_1part(file, prograssbar)
     gc.collect()
     (crossrange, downrange, trunc_image) = SAR_2part(sif, delta_x, Rs, Kr, Xa)

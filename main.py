@@ -8,10 +8,11 @@ import tkinter.messagebox as message
 import tkinter.filedialog as filedialog
 from AppRadar.menu import Menu
 from AppRadar.conection_esp32 import WND_Radar_conection, RadarSAR
-from AppRadar.plot import matplot_widget
+from AppRadar.plot import matplot_widget, AnalysisWindow
 from AppRadar.file_management import load_RADARSAR
 from AppRadar.realtime_scope import RealtimeScope
 from AppRadar.record import RecordWindow
+from AppRadar.analysis import (doppler, ranging, SAR_imaging)
 
 class AppRadar(tkinter.Tk):
     def __init__(self, tittle, geometry):
@@ -21,16 +22,16 @@ class AppRadar(tkinter.Tk):
         self.config(menu=Menu(
             menulist = (
                 ("Archivo", 
-                    (("Abrir", None, self.open)          ,
-                     ("Grabar señal", None, self.record)   ,
+                    (("Abrir", None, self.open)             ,
+                     ("Grabar señal", None, self.record)    ,
                      ("Salir", None, self.destroy)
                     ), 
                 ),
                 ("Analisis", 
-                    (("Señal en tiempo real", None, self.realtime)   ,  
-                     ("Velocidad", None, None)              ,
-                     ("Distancia", None, None)              ,
-                     ("Imagen SAR", None, None)
+                    (("Señal en tiempo real", None, self.realtime)      ,  
+                     ("Velocidad", None, self.doppler)                  ,
+                     ("Distancia", None, self.ranging)                  ,
+                     ("Imagen SAR", None, self.sar_imaging)
                     ), 
                 ),
                 ("Opciones", 
@@ -57,10 +58,9 @@ class AppRadar(tkinter.Tk):
     def place_widgets(self):
         self.matplot.pack()
     def open(self, event=None):
-        file = filedialog.askopenfilename()
-        if len(file) > 0:
-            if file.endswith(".RADARSAR"):
-                self.file_route = file
+        self.file_route = filedialog.askopenfilename()
+        if len(self.file_route) > 0:
+            if self.file_route.endswith(".RADARSAR"):
                 (data, samplerate) = load_RADARSAR(self.file_route)
                 self.matplot.plot(data[1], data[0], samplerate)
             else:
@@ -72,6 +72,12 @@ class AppRadar(tkinter.Tk):
         RecordWindow(self, "Grabar .RADARSAR", "400x200", self.radar)
     def realtime(self, event=None):
         RealtimeScope(self, "Señal de receptor", "600x400", self.radar)
+    def doppler(self, event=None):
+        AnalysisWindow(self, "Velocidad vs tiempo", self.file_route, None, doppler, ("Tiempo", "Velocidad"))
+    def ranging(self, event=None):
+        AnalysisWindow(self, "Velocidad vs tiempo", self.file_route, None, ranging, ("Tiempo", "Distancia"))
+    def sar_imaging(self, event=None):
+        AnalysisWindow(self, "Velocidad vs tiempo", self.file_route, None, SAR_imaging, ("Crossrange", "Downrange"))
     def conexion_esp32(self, event=None):
         WND_Radar_conection(self, "Conectar ESP32", "400x200", self.radar)
     def destroy(self) -> None:
