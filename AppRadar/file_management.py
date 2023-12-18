@@ -47,7 +47,10 @@ def raw_2_numpy_RADARSAR(data_raw = bytes):
     data[1] = data[1] * 0xffff - 0x7fff
     return data
 
-
+def load_RADARSAR(file = DEFAULT_NAME):
+    (data, samplerate) = load_raw_RADARSAR(file)
+    data = raw_2_numpy_RADARSAR(data)
+    return (data, samplerate)
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
