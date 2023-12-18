@@ -1,20 +1,9 @@
 #include <Arduino.h>
 #include <BluetoothSerial.h>
-
-#define RQST_NONE__  0
-#define RQST_INFO__  1
-#define RQST_RECORD  3
-
-#define INFO_MACADR  1
-#define INFO_SMPRTE  2
-
-#define RECD_START_  1
-#define RECD_STOP__  2
-
-#define RAW_DATA_SIZE 10000
-#define DATA_SIZE     5000
+#include <constants.h>
 
 const char MSSG_STOP[] = "$STOP_RECORDING_ESP32#";
+const char name[] = "RADAR_SAR";
 
 BluetoothSerial BT_serial;
 
@@ -25,7 +14,7 @@ namespace RECORD{
 void get_info(int value);
 
 void setup() {
-  BT_serial.begin("RADAR_SAR");
+  BT_serial.begin(name);
 }
 
 void loop() {
@@ -51,6 +40,9 @@ void loop() {
 
 void get_info(int value){
   switch (value){
+  case INFO_NAME__:
+    BT_serial.println(name);
+    break;
   case INFO_MACADR:
     BT_serial.println(BT_serial.getBtAddressString());
     break;

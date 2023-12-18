@@ -9,13 +9,15 @@ RQST_NONE__ = 0
 RQST_INFO__ = 1
 RQST_RECORD = 3
 
+INFO_NAME__ = 0
 INFO_MACADR = 1
 INFO_SMPRTE = 2
 
 RECD_START_ = 1
 RECD_STOP__ = 2
 
-MSSG_STOP = "$STOP_RECORDING_ESP32#\0"
+MSSG_STOP = "$STOP_RECORDING_ESP32#\r\n"
+NAME = "RADAR_SAR\r\n"
 
 RAW_DATA_SIZE = 10000
 DATA_SIZE = 5000
@@ -30,11 +32,22 @@ def get_list_port():
 class RadarSAR(serial.Serial):
     def __init__(self):
         super().__init__()
+        self.status = 0
     def try_connect(self):
         try:
+            self.close()
             self.open()
+            name = self.request_info(INFO_NAME__)
+            if name == NAME:
+                self.status = 1
+            else:
+                print("Error")
+                self.status = 2
         except serial.SerialException as SE:
             print(SE.__str__())
+            self.status = 0
+        print(name, self.port, sep="")
+        return self.status
     def setPort(self, port):
         self.port = port
     def send_message(self, request = int, value = int):
@@ -53,12 +66,15 @@ class RadarSAR(serial.Serial):
 
 
 class WND_Radar_conection(New_window):
-    def __init__(self, master, title, geometry):
+    def __init__(self, master, title, geometry, radar = RadarSAR):
         super().__init__(master, title, geometry)
-        self.radar = RadarSAR()
+        self.radar = radar
         self.list_port = get_list_port()
         self.create_widgets()
         self.place_widgets()
+        if self.radar.status == 1:
+            self.select_port.set(self.radar.port)
+            self.show_info_btns()
     def create_widgets(self):
         self.select_port = tkk.Combobox(master=self, state="readonly",
                                         values=self.list_port)
@@ -72,24 +88,24 @@ class WND_Radar_conection(New_window):
     def show_info_btns(self):
         self.btn_mac_addr.pack()
         self.btn_sample_rate.pack()
+        self.btn_connect['text'] = "Conectado"
     def hide_info_btns(self):
         self.btn_mac_addr.forget()
         self.btn_sample_rate.forget()
+        self.btn_connect['text'] = "Conectar"
     def connect(self):
-        if self.radar.is_open:
+        if self.radar.status == 1:
             return
         self.radar.setPort(self.select_port.get())
-        try:
-            self.radar.try_connect()
-        except BaseException as BE:
-            print(BE.__str__())
-        if self.radar.is_open:
-            self.btn_connect['text'] = "Conectado"
-            self.show_info_btns()
-        else:
-            self.btn_connect['text'] = "Conectar"
+        r = self.radar.try_connect()
+        if r == 0:
             self.hide_info_btns()
             message.showerror("Error de conexion", "No se pudo conectar al puerto seleccionado")
+        elif r == 1:
+            self.show_info_btns()
+        else:
+            self.hide_info_btns()
+            message.showerror("Error de conexion", "Puerto " + self.radar.port + " no corresponde al RADAR SAR")
     def get_mac_addr(self):
         message.showinfo("Direccion MAC", self.radar.request_info(INFO_MACADR))
     def get_samplerate(self):

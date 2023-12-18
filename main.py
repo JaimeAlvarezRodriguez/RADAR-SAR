@@ -7,7 +7,7 @@ import tkinter
 import tkinter.messagebox as message
 import tkinter.filedialog as filedialog
 from AppRadar.menu import Menu
-from AppRadar.conection_esp32 import WND_Radar_conection
+from AppRadar.conection_esp32 import WND_Radar_conection, RadarSAR
 
 class AppRadar(tkinter.Tk):
     def __init__(self, tittle, geometry):
@@ -41,6 +41,8 @@ class AppRadar(tkinter.Tk):
             ))
         )
         self.file_route = ""
+        self.radar = RadarSAR()
+        self.radar.timeout = 5
     def open(self, event=None):
         file = filedialog.askopenfilename()
         if len(file) > 0:
@@ -52,10 +54,10 @@ class AppRadar(tkinter.Tk):
             message.showwarning("Error de Archivo", "No seleccionaste ningun archivo")
         print(self.file_route)
     def conexion_esp32(self, event=None):
-        WND_Radar_conection(self, "Conectar ESP32", "400x200")
+        WND_Radar_conection(self, "Conectar ESP32", "400x200", self.radar)
     def destroy(self) -> None:
         return super().destroy()
 
-root = AppRadar(tittle="RADAR SAR", geometry="600x400")
+root = AppRadar(tittle="RADAR SAR", geometry="800x600")
 tkinter.mainloop()
 
