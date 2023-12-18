@@ -29,7 +29,7 @@ class AppRadar(tkinter.Tk):
                      ("Imagen SAR", None, None)
                     ), 
                 ),
-                ("Configuracion", 
+                ("Opciones", 
                     (("Conexion esp32", None, self.conexion_esp32)         , 
                     ), 
                 ),
