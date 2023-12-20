@@ -33,8 +33,13 @@ def save_raw_RADARSAR(file=DEFAULT_NAME, samplerate = int, data = bytes):
     file.write(data)
     file.close()
     
-def numpy_2_raw_RADARSAR(data):
-    print(data, np.shape(data))
+def save_raw_list_RADARSAR(file=DEFAULT_NAME, samplerate = int, data = list, chuncksize = 10000):
+    file = open(file, mode="wb")
+    file.write((len(data) * chuncksize).to_bytes(4, byteorder="little"))
+    file.write(samplerate.to_bytes(4, byteorder="little"))
+    for chunk in data:
+        file.write(chunk)
+    file.close()
 
 def raw_2_numpy_RADARSAR(data_raw = bytes):
     data = np.frombuffer(data_raw, dtype=np.uint8)

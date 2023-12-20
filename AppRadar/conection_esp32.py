@@ -22,6 +22,10 @@ NAME = "RADAR_SAR\r\n"
 RAW_DATA_SIZE = 10000
 DATA_SIZE = 5000
 
+ESP_NOT_CONNECTED = 0
+ESP_CONNECTED = 1
+ESP_NOT_RADARSAR = 2
+
 def get_list_port():
     list_port = []
     for port in listport.comports():
@@ -34,18 +38,20 @@ class RadarSAR(serial.Serial):
         super().__init__()
         self.status = 0
     def try_connect(self):
+        name = ""
         try:
             self.close()
             self.open()
             name = self.request_info(INFO_NAME__)
+            assert len(name) > 0
             if name == NAME:
-                self.status = 1
+                self.status = ESP_CONNECTED
             else:
                 print("Error")
-                self.status = 2
+                self.status = ESP_NOT_RADARSAR
         except serial.SerialException as SE:
             print(SE.__str__())
-            self.status = 0
+            self.status = ESP_NOT_CONNECTED
         print(name, self.port, sep="")
         return self.status
     def setPort(self, port):

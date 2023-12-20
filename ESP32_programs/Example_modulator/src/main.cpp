@@ -1,18 +1,34 @@
 #include <Arduino.h>
 
-// put function declarations here:
-int myFunction(int, int);
+#define SYNC_PIN    25
+#define SIGNAL_PIN  26
+#define START 64
+#define STOP 144
+#define TIME 230 
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Serial.begin(9600);
+
+  pinMode(SYNC_PIN, OUTPUT);
+
+  for(;;){
+    unsigned long t1 = micros();
+    digitalWrite(SYNC_PIN, HIGH);
+    for(int i = START; i <= STOP; i++){
+      dacWrite(SIGNAL_PIN, i);
+      delayMicroseconds(TIME);
+    }
+    digitalWrite(SYNC_PIN, LOW);
+    for(int i = STOP; i >= START; i--){
+      dacWrite(SIGNAL_PIN, i);
+      delayMicroseconds(TIME);
+    }
+    Serial.printf(">t:%u\n", micros() - t1);
+  }
+  
+  
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
 }

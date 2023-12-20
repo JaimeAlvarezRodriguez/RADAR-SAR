@@ -8,7 +8,7 @@ import tkinter.messagebox as message
 import tkinter.filedialog as filedialog
 import tkinter.ttk as ttk
 from AppRadar.menu import Menu
-from AppRadar.conection_esp32 import WND_Radar_conection, RadarSAR
+from AppRadar.conection_esp32 import WND_Radar_conection, RadarSAR, get_list_port
 from AppRadar.plot import matplot_widget, AnalysisWindow
 from AppRadar.file_management import load_RADARSAR
 from AppRadar.realtime_scope import RealtimeScope
@@ -22,7 +22,7 @@ class AppRadar(tkinter.Tk):
         self.geometry(geometry)
         #icon = tkinter.PhotoImage(file=, format=".ico")
         #self.iconphoto(True, icon)
-        self.iconbitmap(bitmap="./AppRadar/icons/radar.ico")
+        self.iconbitmap(bitmap="./AppRadar/icons/radar.ico", default="./AppRadar/icons/radar.ico")
         self.config(menu=Menu(
             menulist = (
                 ("Archivo", 
@@ -51,6 +51,9 @@ class AppRadar(tkinter.Tk):
         )
         self.file_route = ""
         self.radar = RadarSAR()
+        list_port = get_list_port()
+        list_port.sort()
+        self.radar.port = list_port[0]
         self.radar.timeout = 5
 
         self.create_widgets()
@@ -62,6 +65,9 @@ class AppRadar(tkinter.Tk):
         self.matplot.set_labels("Tiempo (s)", "Señal de receptor")
     def place_widgets(self):
         self.matplot.pack()
+    def verifi_esp32(self):
+        self.radar.try_connect()
+        return self.radar.status == 1
     def open(self, event=None):
         self.file_route = filedialog.askopenfilename()
         if len(self.file_route) > 0:
@@ -77,6 +83,9 @@ class AppRadar(tkinter.Tk):
             self.matplot.set_title("Selecciona un archivo")
         print(self.file_route)
     def record(self, event=None):
+        if not self.verifi_esp32():
+            message.showwarning("ESP32 no conectado", "Primero conecte el ESP32 desde la pestaña opciones en \"Conectar esp32\"")
+            return
         RecordWindow(self, "Grabar .RADARSAR", "400x200", self.radar)
     def realtime(self, event=None):
         RealtimeScope(self, "Señal de receptor", "600x400", self.radar)

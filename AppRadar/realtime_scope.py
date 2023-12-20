@@ -35,7 +35,7 @@ class RealtimeScope(New_window):
             data = self.radar.read(RAW_DATA_SIZE)
             print(len(data))
             data = raw_2_numpy_RADARSAR(data)
-            self.matplot.plot(data[0], data[1], 10800)
+            self.matplot.plot(data[0], data[1], 11672)
         self.after(10, self.update_data)
     def destroy(self) -> None:
         if self.in_progress:
