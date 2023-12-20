@@ -1,3 +1,12 @@
+/*
+Proyect:      RADAR SAR controller
+Authon:       Jaime Álvarez Rodríguez
+Description:  Controller firmware for the RADAR SAR proyect  
+Date:         01/12/2023
+Version:      v1.0
+*/
+
+
 #include <Arduino.h>
 #include <BluetoothSerial.h>
 #include <vector>

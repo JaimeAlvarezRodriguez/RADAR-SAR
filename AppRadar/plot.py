@@ -1,5 +1,6 @@
 import tkinter
 import numpy as np
+import gc
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
@@ -36,15 +37,26 @@ class matplot_widget:
     def set_title(self, title):
         self.ax.set_title(title)
         self.canvas.draw()
+    def set_labels(self, xlabel, ylabel):
+        self.ax.set_xlabel(xlabel)
+        self.ax.set_ylabel(ylabel)
+        self.canvas.draw()
 
 class AnalysisWindow(New_window):
-    def __init__(self, master, tittle, file, progressbar, callback, labels):
+    def __init__(self, master, tittle, file, progressbar, callback, xlabel, ylabel, zmin, zmax):
         super().__init__(master, tittle, "600x400")
-        (x, y, z) = callback(file, progressbar)
+        (self.x, self.y, self.z) = callback(file, progressbar)
+        gc.collect()
+        self.file = file
         self.create_widgets()
         self.place_widgets()
+        self.create_pcolormesh(zmin, zmax, xlabel, ylabel, "Potencia antena receptora (dB)")
     def create_widgets(self):
         self.matplot = matplot_widget(self)
     def place_widgets(self):
         self.matplot.pack()
-    
+    def create_pcolormesh(self, zmin, zmax, xlabel, ylabel, zlabel):
+        mpp = self.matplot.ax.pcolormesh(self.x, self.y, self.z, vmin=zmin, vmax=zmax)
+        self.matplot.fig.colorbar(mpp, label=zlabel)
+        self.matplot.set_title(self.file[self.file.rindex("/")+1:])
+        self.matplot.set_labels(xlabel, ylabel)
