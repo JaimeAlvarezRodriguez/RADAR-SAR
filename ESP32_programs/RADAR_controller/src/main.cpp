@@ -18,7 +18,7 @@ const char name[] = "RADAR_SAR";
 BluetoothSerial BT_serial;
 
 namespace RECORD{
-  double samplerate = 10800;
+  double samplerate = 11670;
   void loop(void *);
   void record();
   TaskHandle_t thRecord;
@@ -52,8 +52,19 @@ void loop() {
     get_info(value);
     break;
   case RQST_RECORD:
-    if(value == RECD_START_){
+    switch (value){
+    case RECD_START_:
+      RECORD::active = true;
       RECORD::record();
+      break;
+    case RECD_STOP__:
+      RECORD::active = false;
+      break;
+    default:
+      break;
+    }
+    if(value == RECD_START_){
+      
     }
     break;
   default:
@@ -82,7 +93,6 @@ void get_info(int value){
 
 
 void RECORD::record(){
-  RECORD::active = true;
   unsigned long t1, t2;
   while(RECORD::active){
     t1 = micros();
@@ -90,9 +100,6 @@ void RECORD::record(){
       bool sync = digitalRead(SYNC_PIN);
       uint16_t signal = analogRead(SGNL_PIN);
       buffer[i] = (sync << 15) | signal;
-      if(!RECORD::active){
-        return;
-      }
     }
     t2 = micros();
     if(t2 > t1)
@@ -103,12 +110,15 @@ void RECORD::record(){
 
 void RECORD::loop(void *){
   for(;;){
-    if(RECORD::send){
-      RECORD::send = false;
-      BT_serial.write((uint8_t *)buffer.data(), RAW_DATA_SIZE);
-    }
     if(BT_serial.available())
       RECORD::active = false;
+    if(RECORD::send && RECORD::active){
+      RECORD::send = false;
+      BT_serial.flush();
+      BT_serial.write((uint8_t *)buffer.data(), RAW_DATA_SIZE);
+      BT_serial.flush();
+    }
+    
     vTaskDelay(1);
   }
 }

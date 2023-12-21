@@ -69,6 +69,9 @@ class RadarSAR(serial.Serial):
     def stop_record(self):
         self.send_message(request=RQST_RECORD, value=RECD_STOP__)
         self.read_until(MSSG_STOP.encode("ascii"))
+    def get_raw_stream(self):
+        self.flush()
+        return self.read(RAW_DATA_SIZE)
 
 
 class WND_Radar_conection(New_window):

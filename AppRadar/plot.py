@@ -19,8 +19,10 @@ class matplot_widget:
         self.sync = self.ax.plot([0])[0]
         self.canvas.draw()
     def on_key_press(self, event):
-        print("you pressed {}".format(event.key))
-        key_press_handler(event, self.canvas, self.toolbar)
+        try:
+            key_press_handler(event, self.canvas, self.toolbar)
+        except:
+            pass
     def pack(self):
         self.canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
     def plot(self, signal, sync, samplerate):

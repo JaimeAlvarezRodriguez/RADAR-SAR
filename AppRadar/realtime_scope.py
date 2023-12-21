@@ -17,7 +17,7 @@ class RealtimeScope(New_window):
         self.matplot = matplot_widget(self)
         self.matplot.set_title("Presiona el boton iniciar")
         self.matplot.set_lim(0, 0.2, -35000, 35000)
-        self.btn_start.after(100, self.update_data)
+        self.btn_start.after(500, self.update_data)
     def place_widgets(self):
         self.btn_start.pack()
         self.btn_stop.pack()
@@ -32,11 +32,11 @@ class RealtimeScope(New_window):
         self.radar.stop_record()
     def update_data(self):
         if self.radar.status == 1 and self.in_progress:
-            data = self.radar.read(RAW_DATA_SIZE)
+            data = self.radar.get_raw_stream()
             print(len(data))
             data = raw_2_numpy_RADARSAR(data)
             self.matplot.plot(data[0], data[1], 11672)
-        self.after(10, self.update_data)
+        self.after(100, self.update_data)
     def destroy(self) -> None:
         if self.in_progress:
             self.stop()

@@ -27,6 +27,7 @@ class RecordWindow(New_window):
         self.btn_stop.pack()
     def start(self):
         self.in_progress = True
+        self.lbl_status['text'] = "Grabando"
         self.lbl_cont.after(1000, self.f_cont)
         threading.Thread(target=self.record).start()
     def stop(self):
@@ -45,9 +46,12 @@ class RecordWindow(New_window):
         data = []
         self.radar.start_record()
         while self.in_progress:
-            data.append(self.radar.read(RAW_DATA_SIZE))
-        file = filedialog.asksaveasfilename(filetypes=(("Archivos de RADAR SAR", "*.RADARSAR"),))
+            data.append(self.radar.get_raw_stream())
+        self.lbl_status['text'] = "Deteniendo de grabar.."
         self.radar.stop_record()
+        self.lbl_status['text'] = "Guardando..."
+        file = filedialog.asksaveasfilename(filetypes=(("Archivos de RADAR SAR", "*.RADARSAR"),))
+        
         if not (len(file) > 0):
             message.showerror("No se pudo guardar el archivo", "No seleccionaste una ruta de archivo")
             return
@@ -56,6 +60,7 @@ class RecordWindow(New_window):
         samplerate = round(float(self.radar.request_info(INFO_SMPRTE)))
         print(file)
         save_raw_list_RADARSAR(file, samplerate, data, RAW_DATA_SIZE)
+        self.lbl_status['text'] = "Presiona Start para comenzar"
     def cont_string(self):
         s = self.cont % 60
         m = (self.cont // 60) % 60

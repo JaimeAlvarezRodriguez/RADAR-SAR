@@ -3,7 +3,7 @@ import numpy.fft as fft
 import gc
 from .file_management import load_RADARSAR, DEFAULT_NAME
 
-__Scale__ = 3.0518E-5
+__Scale__ = 0.405273437500000/13280
 __c__ = 3E8
 
 
@@ -20,8 +20,6 @@ def doppler(file = DEFAULT_NAME, progressbar = print):
     Fc = 2257E6
 
     s = data[0] * 1
-
-
 
     colums = round(len(s)/n)-1
     sif = np.ndarray([colums, n])
@@ -57,70 +55,73 @@ def doppler(file = DEFAULT_NAME, progressbar = print):
     return (time, velocity, (v-mmax).T)
 
 def ranging(file=DEFAULT_NAME, progressbar = print):
-    data, samplerate = load_RADARSAR(file)
-    data = data * __Scale__
+    Y, FS = load_RADARSAR(file)
+
+    Y = Y * 3.0518E-5
+
+    #Constantes
+    c = 3E8
+
     #Parametros del RADAR
     Tp = 20E-3 #Duracion del pulso
-    n = Tp * samplerate #Numero de muestras por pulso
+    n = Tp * FS #Numero de muestras por pulso
     n = int(n)
     fstart = 2402E6 #Hz LFM Frecuencia de inicio por muestra
     fstop = 2495E6 #Hz LFM Frecuencia de stop de muestra
 
     BW = fstop - fstart #hz Ancho de banda de transmision
-    f = np.linspace(fstart, fstop, n//2) #Frecuencia de transmision instantanea
+    f = np.linspace(fstart, fstop, int(np.round(n/2))) #Frecuenci de transmision instantanea
 
     #Rango de resolucion
-    rr = __c__/(2*BW)
+    rr = c/(2*BW)
     max_range = rr*n/2
 
     #La entrada parece estar invertida
-    trig = 1 * data[1]
-    s = 1 * data[0]
+    trig = 1 * Y[1]
+    s = 1 * Y[0]
+
+    Y.resize(0)
 
     #Analiza los datos en el flanco acendente del pulso de sincronizacion
     count = 0
     thresh = 0
     start = (trig > thresh)
 
-    for ii in range(100, int(len(start)-n)+1):
-        ii = ii - 1
-        if (start[ii] == 1) and (np.mean(start[ii-11:ii-1]) == 0):
-            count = count + 1
-
-    sif = np.ndarray([count+1, n-1])
-    time = np.ndarray([count+1])
+    sif = []
+    time = []
     count = 0
 
     for ii in range(100, int(len(start)-n)+1):
         ii = ii - 1
-        if (start[ii] == 1) and (np.mean(start[ii-11:ii-1]) == 0):
+        if (start[ii] == 1) and (np.mean(start[ii-11:ii-1+1]) == 0):
             count = count + 1
-            sif[count, :] = s[ii:ii+n-1]
-            time[count] = ii*1/samplerate
+            sif.append(s[ii:ii+n-1+1])
+            time.append(ii*1/FS)
+        
+    sif = np.array(sif)
+    time = np.array(time)
 
-    ave = np.mean(sif[:, 0])
+    ave = np.mean(sif, axis=0)
+
     for ii in range(len(sif)):
         sif[ii, :] = sif[ii, :] - ave
 
     zpad = 8*n//2
 
     v = dbv(fft.ifft(sif, zpad))
-    S = v[:, :len(v[0])//2]
+
+    S = v[:, 0:len(v[0])//2]
     m = v.max()
 
-    sif2 = sif[0:len(sif),:] - sif[0:len(sif),:]
+    sif2 = sif[2-1:len(sif),:]-sif[1-1:len(sif)-1,:]
     v = fft.ifft(sif2,zpad,1)
     S = v
-    R = np.linspace(0,max_range,zpad)
-    #for ii = 1:size(S,1)
-        #S(ii,:) = S(ii,:).*R.^(3/2); %Optional: magnitude scale to range
+    R = np.linspace(0, max_range, zpad)
 
-    S = dbv(S[:,0:len(v[0])])
+    S = dbv(S[:, 1-1:len(v[0])//2])
     m = S.max()
-    #imagesc(R,time,S-m,[-80, 0]);
 
-    #return (time, np.linspace(0, max_range, len((S)[0])), (S-m).T)
-    return (time, R, (S-m))
+    return (np.linspace(0, (1/FS)*len(s), len(S)+1), np.linspace(0, max_range, len(S[0])+1), (S-m).T)
 
 def SAR_1part(file=DEFAULT_NAME, progressbar=print):
     data, samplerate = load_RADARSAR(file)

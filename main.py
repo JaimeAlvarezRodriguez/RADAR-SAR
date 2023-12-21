@@ -3,6 +3,7 @@ Proyect:        RADAR SAR
 Author:         Jaime Alvarez Rodriguez
 Description:    User interface to control and processing signals from RADAR SAR to computer 
 """
+import sys
 import tkinter
 import tkinter.messagebox as message
 import tkinter.filedialog as filedialog
@@ -22,7 +23,9 @@ class AppRadar(tkinter.Tk):
         self.geometry(geometry)
         #icon = tkinter.PhotoImage(file=, format=".ico")
         #self.iconphoto(True, icon)
-        self.iconbitmap(bitmap="./AppRadar/icons/radar.ico", default="./AppRadar/icons/radar.ico")
+        #icon = os.getcwd().replace("\\", "/") + "/AppRadar/icons/radar.ico"
+        #print(icon)
+        #self.iconbitmap(bitmap=icon, default=icon)
         self.config(menu=Menu(
             menulist = (
                 ("Archivo", 
@@ -58,6 +61,8 @@ class AppRadar(tkinter.Tk):
 
         self.create_widgets()
         self.place_widgets()
+        if len(sys.argv) == 2:
+            self.open_file(sys.argv[1])
     def create_widgets(self):
         self.matplot = matplot_widget(self)
         self.matplot.plot([0, 0], [0, 0], 10800)
@@ -69,7 +74,10 @@ class AppRadar(tkinter.Tk):
         self.radar.try_connect()
         return self.radar.status == 1
     def open(self, event=None):
-        self.file_route = filedialog.askopenfilename()
+        self.open_file(filedialog.askopenfilename())
+    def open_file(self, file = str):
+        file = file.replace("\\", "/")
+        self.file_route = file
         if len(self.file_route) > 0:
             if self.file_route.endswith(".RADARSAR"):
                 (data, samplerate) = load_RADARSAR(self.file_route)
@@ -107,7 +115,7 @@ class AppRadar(tkinter.Tk):
                        callback=ranging, 
                        xlabel="Tiempo (s)", 
                        ylabel="Distancia (m)",
-                       zmin=-40,
+                       zmin=-70,
                        zmax=0)
     def sar_imaging(self, event=None):
         AnalysisWindow(master=self, 
