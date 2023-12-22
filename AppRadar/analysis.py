@@ -353,10 +353,9 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
     progressbar(14)
 
     trunc_image = dbv(trunc_image); #added to scale to d^3/2
-    #crossrange = crossrange * 0.3048
-    #downrange = downrange * 0.3048
-    crossrange = np.linspace(-1, 1, len(trunc_image[0]))
-    downrange = np.linspace(-1, 0, len(trunc_image))
+    crossrange = crossrange * 0.3048
+    downrange = downrange * 0.3048
+
     print(np.mean(trunc_image))
     return (crossrange, downrange, trunc_image)
 

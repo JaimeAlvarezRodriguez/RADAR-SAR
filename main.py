@@ -10,6 +10,7 @@ import tkinter.messagebox as message
 import tkinter.filedialog as filedialog
 import tkinter.ttk as ttk
 import time
+import os
 import webbrowser
 from AppRadar.menu import Menu
 from AppRadar.conection_esp32 import WND_Radar_conection, RadarSAR, get_list_port
@@ -19,16 +20,19 @@ from AppRadar.realtime_scope import RealtimeScope
 from AppRadar.record import RecordWindow
 from AppRadar.analysis import (doppler, ranging, SAR_imaging)
 
+
+
+inner_path = os.path.dirname(__file__)
+print("path: ", inner_path)
+
 class AppRadar(tkinter.Tk):
     def __init__(self, tittle, geometry):
         super().__init__()
         self.title(tittle)
         self.geometry(geometry)
-        #icon = tkinter.PhotoImage(file=, format=".ico")
-        #self.iconphoto(True, icon)
-        #icon = os.getcwd().replace("\\", "/") + "/AppRadar/icons/radar.ico"
-        #print(icon)
-        #self.iconbitmap(bitmap=icon, default=icon)
+        icon = inner_path + "/AppRadar/icons/radar.ico"
+        print(icon)
+        self.iconbitmap(bitmap=icon, default=icon)
         self.config(menu=Menu(
             menulist = (
                 ("Archivo", 
@@ -50,7 +54,7 @@ class AppRadar(tkinter.Tk):
                 ),
                 ("Ayuda", 
                     (("Repositorio", None, self.repository)            ,
-                     ("Licencia", None, None)               ,
+                     ("Licencia", None, self.license)               ,
                     ), 
                 )
             ))
@@ -69,7 +73,7 @@ class AppRadar(tkinter.Tk):
     def create_widgets(self):
         self.matplot = matplot_widget(self)
         self.matplot.plot([0, 0], [0, 0], 10800)
-        self.matplot.set_lim(0, 60*5, -35000, 35000)
+        self.matplot.set_lim(0, 30, -35000, 35000)
         self.matplot.set_labels("Tiempo (s)", "Señal de receptor")
         self.lbl_state = ttk.Label(self, text="")
         self.progressbar = ttk.Progressbar(self, maximum=100, orient="horizontal", mode="determinate")
@@ -131,7 +135,7 @@ class AppRadar(tkinter.Tk):
                        callback=ranging, 
                        xlabel="Tiempo (s)", 
                        ylabel="Distancia (m)",
-                       zmin=-70,
+                       zmin=-60,
                        zmax=0)
     def sar_imaging(self, event=None):
         AnalysisWindow(master=self, 
@@ -145,11 +149,14 @@ class AppRadar(tkinter.Tk):
                        zmax=-80)
     def conexion_esp32(self, event=None):
         WND_Radar_conection(self, "Conectar ESP32", "400x200", self.radar)
+    def repository(self, event=None):
+        webbrowser.open("https://github.com/JaimeAlvarezRodriguez/RADAR-SAR")
+    def license(self, event=None):
+        message.showinfo("Licencia", message="Programado con Python 3\n\nBasado en el proyecto \"Build a small radar system\" del MIT\n\nModulos usados:\n-tkinter\n-matplotlib\n-numpy\n-pyserial")
     def destroy(self) -> None:
         self.quit()
         return super().destroy()
-    def repository(self, event=None):
-        webbrowser.open("https://github.com/JaimeAlvarezRodriguez/RADAR-SAR")
+    
 
 root = AppRadar(tittle="RADAR SAR", geometry="800x600")
 tkinter.mainloop()
