@@ -1,14 +1,16 @@
 import tkinter.ttk as ttk
+import threading
 from .new_window import New_window
 from .file_management import raw_2_numpy_RADARSAR
 from .plot import matplot_widget
-from .conection_esp32 import RadarSAR, RAW_DATA_SIZE
+from .conection_esp32 import RadarSAR, RAW_DATA_SIZE, DEFAULT_SAMPLERATE
 
 class RealtimeScope(New_window):
     def __init__(self, master, title, geometry, radar = RadarSAR):
         super().__init__(master, title, geometry)
         self.radar = radar
         self.in_progress = False
+        self.thr = threading.Thread(target=self.get_data)
         self.create_widgets()
         self.place_widgets()
     def create_widgets(self):
@@ -17,26 +19,36 @@ class RealtimeScope(New_window):
         self.matplot = matplot_widget(self)
         self.matplot.set_title("Presiona el boton iniciar")
         self.matplot.set_lim(0, 0.2, -35000, 35000)
-        self.btn_start.after(500, self.update_data)
     def place_widgets(self):
         self.btn_start.pack()
         self.btn_stop.pack()
         self.matplot.pack()
     def start(self):
-        self.in_progress = True
-        self.matplot.set_title("Recibiendo señal...")
-        self.radar.start_record()
+        if not self.in_progress and not self.thr.is_alive():
+            self.in_progress = True
+            self.matplot.set_title("Recibiendo señal...")
+            self.thr = threading.Thread(target=self.get_data)
+            self.thr.start()
     def stop(self):
         self.in_progress = False
         self.matplot.set_title("Presiona el boton iniciar")
-        self.radar.stop_record()
-    def update_data(self):
-        if self.radar.status == 1 and self.in_progress:
+    def get_data(self):
+        self.radar.start_record()
+        while self.in_progress:
+            print("1", end="")
             data = self.radar.get_raw_stream()
+            print("2", end="")
             print(len(data))
-            data = raw_2_numpy_RADARSAR(data)
-            self.matplot.plot(data[0], data[1], 11672)
-        self.after(100, self.update_data)
+            print("3", end="")
+            if (len(data) == RAW_DATA_SIZE):
+                print("4", end="")
+                data = raw_2_numpy_RADARSAR(data)
+                print("5", end="")
+                self.matplot.plot(data[0], data[1], DEFAULT_SAMPLERATE)
+                print("6", end="")
+        print("7", end="")
+        self.radar.stop_record()
+        print("8", end="")
     def destroy(self) -> None:
         if self.in_progress:
             self.stop()

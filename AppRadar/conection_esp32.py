@@ -22,6 +22,8 @@ NAME = "RADAR_SAR\r\n"
 RAW_DATA_SIZE = 10000
 DATA_SIZE = 5000
 
+DEFAULT_SAMPLERATE = 11670
+
 ESP_NOT_CONNECTED = 0
 ESP_CONNECTED = 1
 ESP_NOT_RADARSAR = 2
@@ -37,6 +39,7 @@ class RadarSAR(serial.Serial):
     def __init__(self):
         super().__init__()
         self.status = 0
+        self.baudrate = 115200
     def try_connect(self):
         name = ""
         try:

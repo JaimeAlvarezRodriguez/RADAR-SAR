@@ -131,8 +131,8 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
     Tp = 20e-3
     Trp = 0.25
     N = int(Tp*samplerate)
-    fstart = 2420e6
-    fstop = 2480e6
+    fstart = 2402e6
+    fstop = 2490e6
 
     Bw = fstop - fstart
     f = np.linspace(fstart, fstop, N//2)
@@ -140,7 +140,7 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
     progressbar(1)
 
     trig = 1 * data[1]
-    s = 1 * data[0]
+    s = data[0] * 1
 
     data = 0
     gc.collect()
@@ -213,7 +213,7 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
     cr = B/20E-3 #(Hz/sec) chirp rate
     Tp = 20E-3 #(sec) pulse width
     #VERY IMPORTANT, change Rs to distance to cal target
-    #Rs = (12+9/12)*.3048; %(m) y coordinate to scene center (down range), make this value equal to distance to cal target
+    #Rs = (12+9/12)*.3048#; %(m) y coordinate to scene center (down range), make this value equal to distance to cal target
     Rs = 0
     Xa = 0 #(m) beginning of new aperture length
     delta_x = 2*(1/12)*0.3048 #(m) 2 inch antenna spacing
@@ -353,8 +353,10 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
     progressbar(14)
 
     trunc_image = dbv(trunc_image); #added to scale to d^3/2
-    crossrange = crossrange * 0.3048
-    downrange = downrange * 0.3048
+    #crossrange = crossrange * 0.3048
+    #downrange = downrange * 0.3048
+    crossrange = np.linspace(-1, 1, len(trunc_image[0]))
+    downrange = np.linspace(-1, 0, len(trunc_image))
     print(np.mean(trunc_image))
     return (crossrange, downrange, trunc_image)
 
@@ -363,5 +365,8 @@ def SAR_imaging(file=DEFAULT_NAME, prograssbar=print):
     (sif, delta_x, Rs, Kr, Xa) = SAR_1part(file, prograssbar)
     gc.collect()
     (crossrange, downrange, trunc_image) = SAR_2part(sif, delta_x, Rs, Kr, Xa)
+    min = trunc_image.max()-40
+    max = trunc_image.max()-0
+    print("[", min, max, "]")
     gc.collect()
     return (crossrange, downrange, trunc_image)

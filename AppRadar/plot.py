@@ -62,3 +62,4 @@ class AnalysisWindow(New_window):
         self.matplot.fig.colorbar(mpp, label=zlabel)
         self.matplot.set_title(self.file[self.file.rindex("/")+1:])
         self.matplot.set_labels(xlabel, ylabel)
+        self.matplot.ax.set_xlim(xmin=-3, xmax=3)

@@ -4,7 +4,7 @@ import tkinter.filedialog as filedialog
 import tkinter.messagebox as message
 from .file_management import save_raw_list_RADARSAR, FILE_EXTENSION
 from .new_window import New_window
-from .conection_esp32 import RadarSAR, RAW_DATA_SIZE, INFO_SMPRTE
+from .conection_esp32 import RadarSAR, RAW_DATA_SIZE, INFO_SMPRTE, DEFAULT_SAMPLERATE
 
 class RecordWindow(New_window):
     def __init__(self, master, tittle, geometry, radar = RadarSAR):
@@ -57,7 +57,10 @@ class RecordWindow(New_window):
             return
         if  not file.endswith(FILE_EXTENSION):
             file = file + FILE_EXTENSION
-        samplerate = round(float(self.radar.request_info(INFO_SMPRTE)))
+        try:
+            samplerate = round(float(self.radar.request_info(INFO_SMPRTE)))
+        except:
+            samplerate = DEFAULT_SAMPLERATE
         print(file)
         save_raw_list_RADARSAR(file, samplerate, data, RAW_DATA_SIZE)
         self.lbl_status['text'] = "Presiona Start para comenzar"

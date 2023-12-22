@@ -17,3 +17,5 @@
 
 #define SYNC_PIN 35
 #define SGNL_PIN 34
+
+#define DEFAULT_SAMPLERATE 11670
