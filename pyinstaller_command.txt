@@ -1,0 +1,1 @@
+pyinstaller --onefile --add-data=AppRadar/icons:AppRadar/icons --icon=AppRadar/icons/radar.ico main.py 

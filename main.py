@@ -86,7 +86,7 @@ class AppRadar(tkinter.Tk):
         self.radar.try_connect()
         return self.radar.status == 1
     def open(self, event=None):
-        self.open_file(filedialog.askopenfilename())
+        self.open_file(filedialog.askopenfilename(filetypes=(("Archivo RADARSAR", "*.RADARSAR"), )))
     def open_file(self, file = str):
         file = file.replace("\\", "/")
         self.file_route = file
