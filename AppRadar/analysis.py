@@ -148,8 +148,6 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
     Bw = fstop - fstart
     f = np.linspace(fstart, fstop, N//2)
 
-    progressbar(1)
-
     trig = 1 * data[1]
     s = data[0] * 4
 
@@ -239,8 +237,6 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
     return (sif, delta_x, Rs, Kr, Xa)
 
 def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
-    progressbar(7)
-
     N = len(sif[0])
     H = []
 
@@ -248,14 +244,12 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
         H.append(0.5 + 0.5 * np.cos(2 * np.pi * (ii - N / 2) / N))
 
     H = np.array(H)
-    progressbar(8)
     sif_h = []
     for ii in range(len(sif)):
         sif_h.append(sif[ii, :].T*H)
 
     sif_h = np.array(sif_h)
     sif = sif_h
-    progressbar(9)
     zpad = 2048
 
     szeros = np.full(shape=(zpad, len(sif[0])), fill_value=0j)
