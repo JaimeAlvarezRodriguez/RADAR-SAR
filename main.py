@@ -55,6 +55,7 @@ class AppRadar(tkinter.Tk):
                 ("Ayuda", 
                     (("Repositorio", None, self.repository)            ,
                      ("Licencia", None, self.license)               ,
+                     ("Guia de uso", None, self.guia)
                     ), 
                 )
             ))
@@ -125,7 +126,7 @@ class AppRadar(tkinter.Tk):
                        callback=doppler, 
                        xlabel="Tiempo (s)", 
                        ylabel="Velocidad (km/h)",
-                       zmin=-35,
+                       zmin=-60,
                        zmax=0)
     def ranging(self, event=None):
         AnalysisWindow(master=self, 
@@ -135,7 +136,7 @@ class AppRadar(tkinter.Tk):
                        callback=ranging, 
                        xlabel="Tiempo (s)", 
                        ylabel="Distancia (m)",
-                       zmin=-60,
+                       zmin=-80,
                        zmax=0)
     def sar_imaging(self, event=None):
         AnalysisWindow(master=self, 
@@ -145,14 +146,17 @@ class AppRadar(tkinter.Tk):
                        callback=SAR_imaging, 
                        xlabel="Crossrange (m)", 
                        ylabel="Downrange (m)",
-                       zmin=-120,
-                       zmax=-80)
+                       zmin=-100,
+                       zmax=-40)
     def conexion_esp32(self, event=None):
         WND_Radar_conection(self, "Conectar ESP32", "400x200", self.radar)
     def repository(self, event=None):
         webbrowser.open("https://github.com/JaimeAlvarezRodriguez/RADAR-SAR")
     def license(self, event=None):
         message.showinfo("Licencia", message="Programado con Python 3\n\nBasado en el proyecto \"Build a small radar system\" del MIT\n\nModulos usados:\n-tkinter\n-matplotlib\n-numpy\n-pyserial")
+    def guia(self, event=None):
+        message.showinfo("Guia de uso", 
+        "1.-Enciende el RADAR\n2.-Coloca el RADAR el en modo requerido\n3.-Haz una grabación del RADAR\n4.-Procesa el archivo en su respectivo tipo de análisis\nPara mas información, consultar el manual de usuario del RADAR")
     def destroy(self) -> None:
         self.quit()
         return super().destroy()

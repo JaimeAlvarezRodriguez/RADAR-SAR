@@ -140,7 +140,7 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
     progressbar(1)
 
     trig = 1 * data[1]
-    s = data[0] * 1
+    s = data[0] * 4
 
     data = 0
     gc.collect()
@@ -207,14 +207,17 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
 
     gc.collect()
     c = 3e8
+
     #radar parameters
-    fc = (2590E6 - 2260E6)/2 + 2260E6 #(Hz) center radar frequency
-    B = (2590E6 - 2260E6) #(hz) bandwidth
+    fc = (fstop - fstart)/2 + fstart #(Hz) center radar frequency
+    B = (fstop - fstart) #(hz) bandwidth
+    #fc = (2590E6 - 2260E6)/2 + 2260E6#; %(Hz) center radar frequency
+    #B = (2590E6 - 2260E6)#; %(hz) bandwidth
     cr = B/20E-3 #(Hz/sec) chirp rate
     Tp = 20E-3 #(sec) pulse width
     #VERY IMPORTANT, change Rs to distance to cal target
-    #Rs = (12+9/12)*.3048#; %(m) y coordinate to scene center (down range), make this value equal to distance to cal target
-    Rs = 0
+    Rs = (12+9/12)*.3048#; %(m) y coordinate to scene center (down range), make this value equal to distance to cal target
+    #Rs = 0
     Xa = 0 #(m) beginning of new aperture length
     delta_x = 2*(1/12)*0.3048 #(m) 2 inch antenna spacing
     L = delta_x*(len(sif)) #(m) aperture length
@@ -244,8 +247,6 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
     sif = sif_h
     progressbar(9)
     zpad = 2048
-
-    #szeros = np.zeros(shape=(zpad, len(sif[0])))
 
     szeros = np.full(shape=(zpad, len(sif[0])), fill_value=0j)
     for ii in range(1, len(sif[0])+1):
@@ -288,6 +289,8 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
 
     kstart = 73
     kstop = 108.5
+    #kstart = 95
+    #kstop = 108.5
 
     Ky_even = np.linspace(kstart, kstop, 1024)
 
@@ -334,10 +337,10 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
     max_range = (3E8*len(S_st[0])/(2*bw))*1/.3048
     S_image = v #edited to scale range to d^3/2
     S_image = np.fliplr(np.rot90(S_image))
-    cr1 = -80 #(ft)
-    cr2 = 80 #(ft)
+    cr1 = -800 #(ft)
+    cr2 = 800 #(ft)
     dr1 = 1 + Rs/.3048 #(ft)
-    dr2 = 350 + Rs/.3048 #(ft)
+    dr2 = 3500 + Rs/.3048 #(ft)
     #data truncation
     dr_index1 = round((dr1/max_range)*len(S_image))
     dr_index2 = round((dr2/max_range)*len(S_image))
