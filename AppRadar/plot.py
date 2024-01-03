@@ -60,7 +60,6 @@ class AnalysisWindow(New_window):
     def create_pcolormesh(self, zmin, zmax, xlabel, ylabel, zlabel):
         mpp = self.matplot.ax.pcolormesh(self.x, self.y, self.z, vmin=zmin, vmax=zmax)
         self.matplot.fig.colorbar(mpp, label=zlabel)
-        #.matplot.ax.set_xlim([-55, 55])
         self.matplot.set_title(self.file[self.file.rindex("/")+1:])
         self.matplot.set_labels(xlabel, ylabel)
     def destroy(self) -> None:

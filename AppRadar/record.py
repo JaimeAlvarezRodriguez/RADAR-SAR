@@ -5,7 +5,7 @@ import tkinter.messagebox as message
 from .file_management import save_raw_list_RADARSAR, FILE_EXTENSION
 from .new_window import New_window
 from .conection_esp32 import RadarSAR, RAW_DATA_SIZE, INFO_SMPRTE, DEFAULT_SAMPLERATE
-
+from .import debug
 class RecordWindow(New_window):
     def __init__(self, master, tittle, geometry, radar = RadarSAR):
         super().__init__(master, tittle, geometry)
@@ -36,13 +36,15 @@ class RecordWindow(New_window):
         if self.in_progress:
             self.cont = self.cont + 1
             self.lbl_cont["text"] = self.cont_string()
-            print(self.cont_string())
+            if debug:
+                print(self.cont_string())
             self.after(1000, self.f_cont)
         else:
             self.cont = 0
             self.lbl_cont["text"] = self.cont_string()
     def record(self):
-        print("hola")
+        if debug:
+            print("Start recording")
         data = []
         self.radar.start_record()
         while self.in_progress:
@@ -61,7 +63,8 @@ class RecordWindow(New_window):
             samplerate = round(float(self.radar.request_info(INFO_SMPRTE)))
         except:
             samplerate = DEFAULT_SAMPLERATE
-        print(file)
+        if debug:
+            print("Recorded as: ", file)
         save_raw_list_RADARSAR(file, samplerate, data, RAW_DATA_SIZE)
         self.lbl_status['text'] = "Presiona Start para comenzar"
     def cont_string(self):

@@ -12,6 +12,7 @@ import tkinter.ttk as ttk
 import time
 import os
 import webbrowser
+from AppRadar import debug
 from AppRadar.menu import Menu
 from AppRadar.conection_esp32 import WND_Radar_conection, RadarSAR, get_list_port
 from AppRadar.plot import matplot_widget, AnalysisWindow
@@ -21,9 +22,10 @@ from AppRadar.record import RecordWindow
 from AppRadar.analysis import (doppler, ranging, SAR_imaging)
 
 
-
 inner_path = os.path.dirname(__file__)
-print("path: ", inner_path)
+
+if debug:
+    print("path: ", inner_path)
 
 class AppRadar(tkinter.Tk):
     def __init__(self, tittle, geometry):
@@ -31,7 +33,8 @@ class AppRadar(tkinter.Tk):
         self.title(tittle)
         self.geometry(geometry)
         icon = inner_path + "/AppRadar/icons/radar.ico"
-        print(icon)
+        if debug:
+            print(icon)
         self.iconbitmap(bitmap=icon, default=icon)
         self.config(menu=Menu(
             menulist = (
@@ -69,28 +72,16 @@ class AppRadar(tkinter.Tk):
 
         self.create_widgets()
         self.place_widgets()
-        if len(sys.argv) == 2:
+        if len(sys.argv) >= 2:
             self.open_file(sys.argv[1])
     def create_widgets(self):
         self.matplot = matplot_widget(self)
         self.matplot.plot([0, 0], [0, 0], 10800)
         self.matplot.set_lim(0, 30, -35000, 35000)
         self.matplot.set_labels("Tiempo (s)", "Señal de receptor")
-        self.lbl_state = ttk.Label(self, text="")
-        self.progressbar = ttk.Progressbar(self, maximum=100, orient="horizontal", mode="determinate")
+        self.matplot.set_title("Selecciona un archivo")
     def place_widgets(self):
         self.matplot.pack()
-    def start_progressbar(self, analisys = str):
-        self.lbl_state.pack()
-        self.progressbar.pack()
-        self.lbl_state["text"] = "Procesando: " + analisys
-        self.progressbar["value"] = 0
-    def update_progressbar(self, value = int):
-        self.progressbar["value"] = value
-        print(value)
-    def stop_progressbar(self):
-        self.lbl_state.forget()
-        self.progressbar.forget()
     def verifi_esp32(self):
         self.radar.try_connect()
         return self.radar.status == 1
@@ -107,16 +98,22 @@ class AppRadar(tkinter.Tk):
             else:
                 message.showwarning("Error de Archivo", "Selecciona un archivo con la extension .RADARSAR")
                 self.matplot.set_title("Extensión no compatible")
+                self.matplot.plot([0], [0], 1000)
         else:
             message.showwarning("Error de Archivo", "No seleccionaste ningun archivo")
             self.matplot.set_title("Selecciona un archivo")
-        print(self.file_route)
+            self.matplot.plot([0], [0], 1000)
+        if debug:
+            print(self.file_route)
     def record(self, event=None):
         if not self.verifi_esp32():
             message.showwarning("ESP32 no conectado", "Primero conecte el ESP32 desde la pestaña opciones en \"Conectar esp32\"")
             return
         RecordWindow(self, "Grabar .RADARSAR", "400x200", self.radar)
     def realtime(self, event=None):
+        if not self.verifi_esp32():
+            message.showwarning("ESP32 no conectado", "Primero conecte el ESP32 desde la pestaña opciones en \"Conectar esp32\"")
+            return
         RealtimeScope(self, "Señal de receptor", "600x400", self.radar)
     def doppler(self, event=None):
         AnalysisWindow(master=self, 
@@ -156,7 +153,7 @@ class AppRadar(tkinter.Tk):
         message.showinfo("Licencia", message="Programado con Python 3\n\nBasado en el proyecto \"Build a small radar system\" del MIT\n\nModulos usados:\n-tkinter\n-matplotlib\n-numpy\n-pyserial")
     def guia(self, event=None):
         message.showinfo("Guia de uso", 
-        "1.-Enciende el RADAR\n2.-Coloca el RADAR el en modo requerido\n3.-Haz una grabación del RADAR\n4.-Procesa el archivo en su respectivo tipo de análisis\nPara mas información, consultar el manual de usuario del RADAR")
+        "1.-Enciende el RADAR\n2.-Apunta las antenas del RADAR a un blanco (preferentemente en movimiento)\n3.-Coloca el RADAR el en modo requerido\n4.-Haz una grabación del RADAR\n5.-Procesa el archivo en su respectivo tipo de análisis\nPara mas información, consultar el manual de usuario del RADAR")
     def destroy(self) -> None:
         self.quit()
         return super().destroy()

@@ -2,6 +2,7 @@ import numpy as np
 import numpy.fft as fft
 import gc
 from .file_management import load_RADARSAR, DEFAULT_NAME
+from .import debug
 
 __Scale__ = 0.405273437500000/13280
 __c__ = 3E8
@@ -19,6 +20,8 @@ def doppler(file = DEFAULT_NAME, progressbar = print):
     n = int(n)
     Fc = 2257E6
 
+    progressbar(20)
+
     s = data[0] * 1
 
     colums = round(len(s)/n)-1
@@ -26,6 +29,8 @@ def doppler(file = DEFAULT_NAME, progressbar = print):
 
     for ii in range(colums):
         sif[ii, :] = s[(ii)*n : (ii+1)*n]
+
+    progressbar(40)
 
     sif = sif - np.mean(sif)
 
@@ -36,11 +41,14 @@ def doppler(file = DEFAULT_NAME, progressbar = print):
     v = v[:, 1:round(len(v[0])/2)]
     mmax = v.max()
 
+    progressbar(60)
 
     #Calculate velocity
     delta_f = np.linspace(0, samplerate/2, len(v[0]))
     lamb = __c__ / Fc
     velocity = delta_f * lamb / 2
+
+    progressbar(80)
 
     #calculate time
     time = np.linspace(0, Tp*len(v), len(v))
@@ -51,6 +59,8 @@ def doppler(file = DEFAULT_NAME, progressbar = print):
         if (v[i][ii]-mmax) < -35:
             v[i][ii] = -35 + mmax
     """
+
+    progressbar(95)
     velocity = velocity * 3.6
     return (time, velocity, (v-mmax).T)
 
@@ -61,7 +71,7 @@ def ranging(file=DEFAULT_NAME, progressbar = print):
 
     #Constantes
     c = 3E8
-
+    progressbar(10)
     #Parametros del RADAR
     Tp = 20E-3 #Duracion del pulso
     n = Tp * FS #Numero de muestras por pulso
@@ -71,7 +81,7 @@ def ranging(file=DEFAULT_NAME, progressbar = print):
 
     BW = fstop - fstart #hz Ancho de banda de transmision
     f = np.linspace(fstart, fstop, int(np.round(n/2))) #Frecuenci de transmision instantanea
-
+    progressbar(20)
     #Rango de resolucion
     rr = c/(2*BW)
     max_range = rr*n/2
@@ -79,7 +89,7 @@ def ranging(file=DEFAULT_NAME, progressbar = print):
     #La entrada parece estar invertida
     trig = 1 * Y[1]
     s = 1 * Y[0]
-
+    progressbar(30)
     Y.resize(0)
 
     #Analiza los datos en el flanco acendente del pulso de sincronizacion
@@ -90,6 +100,7 @@ def ranging(file=DEFAULT_NAME, progressbar = print):
     sif = []
     time = []
     count = 0
+    progressbar(40)
 
     for ii in range(100, int(len(start)-n)+1):
         ii = ii - 1
@@ -100,27 +111,27 @@ def ranging(file=DEFAULT_NAME, progressbar = print):
         
     sif = np.array(sif)
     time = np.array(time)
-
+    progressbar(50)
     ave = np.mean(sif, axis=0)
 
     for ii in range(len(sif)):
         sif[ii, :] = sif[ii, :] - ave
-
+    progressbar(60)
     zpad = 8*n//2
 
     v = dbv(fft.ifft(sif, zpad))
 
     S = v[:, 0:len(v[0])//2]
     m = v.max()
-
+    progressbar(70)
     sif2 = sif[2-1:len(sif),:]-sif[1-1:len(sif)-1,:]
     v = fft.ifft(sif2,zpad,1)
     S = v
     R = np.linspace(0, max_range, zpad)
-
+    progressbar(80)
     S = dbv(S[:, 1-1:len(v[0])//2])
     m = S.max()
-
+    progressbar(95)
     return (np.linspace(0, (1/FS)*len(s), len(S)+1), np.linspace(0, max_range, len(S[0])+1), (S-m).T)
 
 def SAR_1part(file=DEFAULT_NAME, progressbar=print):
@@ -149,7 +160,7 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
     count = 0
     Nrp = int(Trp * samplerate)
 
-    progressbar(2)
+    progressbar(10)
 
     RP = []
     RPtrig = []
@@ -160,7 +171,7 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
             RP.append(s[ii-1:ii+Nrp-1-1+1])
             RPtrig.append(trig[ii-1:ii+Nrp-1-1+1])
 
-    progressbar(3)
+    progressbar(20)
 
     RP = np.array(RP)
     RPtrig = np.array(RPtrig)
@@ -170,7 +181,7 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
 
     gc.collect()
 
-    progressbar(4)
+    progressbar(30)
 
     sif = []
 
@@ -192,11 +203,9 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
         sif.append(extra)
 
 
-    progressbar(5)
+    progressbar(40)
 
     sif = np.nan_to_num(np.array(sif), nan=1e-30)
-
-    progressbar(6)
 
     s = sif
 
@@ -216,8 +225,8 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
     cr = B/20E-3 #(Hz/sec) chirp rate
     Tp = 20E-3 #(sec) pulse width
     #VERY IMPORTANT, change Rs to distance to cal target
-    Rs = (12+9/12)*.3048#; %(m) y coordinate to scene center (down range), make this value equal to distance to cal target
-    #Rs = 0
+    #Rs = (12+9/12)*.3048#; %(m) y coordinate to scene center (down range), make this value equal to distance to cal target
+    Rs = 0
     Xa = 0 #(m) beginning of new aperture length
     delta_x = 2*(1/12)*0.3048 #(m) 2 inch antenna spacing
     L = delta_x*(len(sif)) #(m) aperture length
@@ -226,6 +235,7 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
     Ya = Rs #THIS IS VERY IMPORTANT, SEE GEOMETRY FIGURE 10.6
     t = np.linspace(0, Tp, len(sif[0])) #(s) fast time, CHECK SAMPLE RATE
     Kr = np.linspace(((4*np.pi/c)*(fc - B/2)), ((4*np.pi/c)*(fc + B/2)), (len(t)))
+    progressbar(50)
     return (sif, delta_x, Rs, Kr, Xa)
 
 def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
@@ -252,10 +262,9 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
     for ii in range(1, len(sif[0])+1):
         index = round((zpad - len(sif))/2) + 1
         szeros[index+1-1:(index + len(sif))-1+1, ii-1] = sif[:,ii-1]
-
+    progressbar(60)
     sif = szeros.copy()
     szeros.resize(0)
-    progressbar(10)
 
     S = fft.fftshift(fft.fft(sif.T), 1).T.copy()
 
@@ -276,7 +285,7 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
             Krr[jj, ii] = Kr[ii]
             Kxx[jj, ii] = Kx[jj]
 
-    progressbar(11)
+    progressbar(70)
 
     smf = np.exp(0j*phi_mf)
 
@@ -298,7 +307,7 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
     Ky = np.ndarray(shape=(zpad, len(Kr)))
     S_st = np.full(shape=(zpad, len(Ky_even)), fill_value=0j)
 
-    progressbar(11)
+    progressbar(80)
 
     for ii in range(1, zpad+1):
         count = count + 1
@@ -313,7 +322,7 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
 
     gc.collect()
 
-    progressbar(12)
+    progressbar(85)
 
     N = len(Ky_even)
     H = np.ndarray(shape=(N, ))
@@ -329,7 +338,7 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
     Kxx.resize(0)
     gc.collect()
 
-    progressbar(13)
+    progressbar(90)
 
     v = fft.ifft2(S_st, s=(len(S_st)*4, len(S_st[0])*4))
 
@@ -337,10 +346,10 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
     max_range = (3E8*len(S_st[0])/(2*bw))*1/.3048
     S_image = v #edited to scale range to d^3/2
     S_image = np.fliplr(np.rot90(S_image))
-    cr1 = -800 #(ft)
-    cr2 = 800 #(ft)
+    cr1 = -80 #(ft)
+    cr2 = 80 #(ft)
     dr1 = 1 + Rs/.3048 #(ft)
-    dr2 = 3500 + Rs/.3048 #(ft)
+    dr2 = 350 + Rs/.3048 #(ft)
     #data truncation
     dr_index1 = round((dr1/max_range)*len(S_image))
     dr_index2 = round((dr2/max_range)*len(S_image))
@@ -353,22 +362,20 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
     for ii in range(1, len(trunc_image[0])+1):
         trunc_image[:,ii-1] = (trunc_image[:,ii-1].T).T*(abs(downrange*.3048)).T**(3/2)
 
-    progressbar(14)
-
     trunc_image = dbv(trunc_image); #added to scale to d^3/2
     crossrange = crossrange * 0.3048
     downrange = downrange * 0.3048
-
-    print(np.mean(trunc_image))
+    progressbar(95)
     return (crossrange, downrange, trunc_image)
 
 
 def SAR_imaging(file=DEFAULT_NAME, prograssbar=print):
     (sif, delta_x, Rs, Kr, Xa) = SAR_1part(file, prograssbar)
     gc.collect()
-    (crossrange, downrange, trunc_image) = SAR_2part(sif, delta_x, Rs, Kr, Xa)
+    (crossrange, downrange, trunc_image) = SAR_2part(sif, delta_x, Rs, Kr, Xa, prograssbar)
     min = trunc_image.max()-40
     max = trunc_image.max()-0
-    print("[", min, max, "]")
+    if debug:
+        print("SAR min-max: ", "[", min, max, "]")
     gc.collect()
     return (crossrange, downrange, trunc_image)

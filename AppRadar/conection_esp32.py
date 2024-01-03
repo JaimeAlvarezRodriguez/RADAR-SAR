@@ -4,6 +4,7 @@ import tkinter
 import tkinter.ttk as tkk
 import tkinter.messagebox as message
 from .new_window import New_window
+from .import debug
 
 RQST_NONE__ = 0
 RQST_INFO__ = 1
@@ -50,12 +51,15 @@ class RadarSAR(serial.Serial):
             if name == NAME:
                 self.status = ESP_CONNECTED
             else:
-                print("Error")
+                if debug:
+                    print("Error")
                 self.status = ESP_NOT_RADARSAR
         except serial.SerialException as SE:
-            print(SE.__str__())
+            if debug:
+                print(SE.__str__())
             self.status = ESP_NOT_CONNECTED
-        print(name, self.port, sep="")
+        if debug:
+            print(name, self.port, sep="")
         return self.status
     def setPort(self, port):
         self.port = port

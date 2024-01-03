@@ -1,9 +1,11 @@
 import tkinter
+from .import debug
 
-import sys
-print(sys.argv)
-import os
-print(os.getcwd())
+if debug:
+    import sys
+    print(sys.argv)
+    import os
+    print(os.getcwd())
 
 class New_window(tkinter.Toplevel):
     def __init__(self, master, tittle, geometry):

@@ -35,20 +35,11 @@ class RealtimeScope(New_window):
     def get_data(self):
         self.radar.start_record()
         while self.in_progress:
-            print("1", end="")
             data = self.radar.get_raw_stream()
-            print("2", end="")
-            print(len(data))
-            print("3", end="")
             if (len(data) == RAW_DATA_SIZE):
-                print("4", end="")
                 data = raw_2_numpy_RADARSAR(data)
-                print("5", end="")
                 self.matplot.plot(data[0], data[1], DEFAULT_SAMPLERATE)
-                print("6", end="")
-        print("7", end="")
         self.radar.stop_record()
-        print("8", end="")
     def destroy(self) -> None:
         if self.in_progress:
             self.stop()
