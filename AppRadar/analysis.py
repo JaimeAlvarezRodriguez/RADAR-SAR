@@ -1,3 +1,10 @@
+"""
+Description:    Algoritm to analysis doppler, ranging and SAR imaging coffee can RADAR
+
+Based on course 'Build A Small Radar System Capable Of Sensing Range, Doppler, And Synthetic Aperture Radar Imaging' from MIT
+This algorithm was written by Gregory L. Charvat
+"""
+
 import numpy as np
 import numpy.fft as fft
 import gc
@@ -140,7 +147,7 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
     data = data * __Scale__
 
     Tp = 20e-3
-    Trp = 0.25
+    Trp = 0.250
     N = int(Tp*samplerate)
     fstart = 2402e6
     fstop = 2490e6
@@ -149,7 +156,7 @@ def SAR_1part(file=DEFAULT_NAME, progressbar=print):
     f = np.linspace(fstart, fstop, N//2)
 
     trig = 1 * data[1]
-    s = data[0] * 4
+    s = data[0] 
 
     data = 0
     gc.collect()
@@ -293,7 +300,7 @@ def SAR_2part(sif, delta_x, Rs, Kr, Xa, progressbar = print):
     kstart = 73
     kstop = 108.5
     #kstart = 95
-    #kstop = 108.5
+    #kstop = 102
 
     Ky_even = np.linspace(kstart, kstop, 1024)
 
