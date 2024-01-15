@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "RADAR_controller",
+			"path": "ESP32_programs/RADAR_controller"
+		},
+		{
+			"name": "Example_modulator",
+			"path": "ESP32_programs/Example_modulator"
+		},
+		{
+			"name": "motor_DC",
+			"path": "ESP32_programs/motor_DC"
+		}
+	],
+	"settings": {}
+}
